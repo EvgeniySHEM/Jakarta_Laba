@@ -74,9 +74,11 @@ public class Client implements Comparable {
         return new HashSet<>(addresses);
     }
 
-    public void addAddress(Address address) {
-        addresses.add(address);
-        address.setClient(this);
+    public void addAddress(Address... address) {
+        for(Address ex : address) {
+            addresses.add(ex);
+            ex.setClient(this);
+        }
     }
 
     @Override

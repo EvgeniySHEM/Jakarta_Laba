@@ -16,31 +16,10 @@
     <p><input type="submit" value="Sing in"></p>
 </form>
 <form action="ViewListServlet" method="get" align="center">
-    <p><input type="text" name="filter" placeholder="filter"></p>
-    <p><input type="submit" value="Filter"></p>
+    <select name="select">
+        <option value="t1">Пункт 1</option>
+        <option value="t2">Пункт 2</option>
+    </select>
 </form>
-
-<%--<table align="center" cellpadding="5" border="1" cellspacing="0" text-align="center">--%>
-<%--    <tr>--%>
-<%--        <th>clientId</th>--%>
-<%--        <th>clientName</th>--%>
-<%--        <th>type</th>--%>
-<%--        <th>added</th>--%>
-<%--        <th>ip</th>--%>
-<%--        <th>mac</th>--%>
-<%--        <th>model</th>--%>
-<%--        <th>address</th>--%>
-<%--    </tr>--%>
-<%--    <tr>--%>
-<%--        <td></td>--%>
-<%--        <td></td>--%>
-<%--        <td></td>--%>
-<%--        <td></td>--%>
-<%--        <td></td>--%>
-<%--        <td></td>--%>
-<%--        <td></td>--%>
-<%--        <td></td>--%>
-<%--    </tr>--%>
-<%--</table>--%>
 </body>
 </html>

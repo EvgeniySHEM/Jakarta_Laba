@@ -1,13 +1,17 @@
 package ru.sanctio.jakarta_laba;
 
 import jakarta.ejb.EJB;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @WebServlet(name = "ViewListServlet", value = "/ViewListServlet")
 public class ViewListServlet extends HttpServlet {
@@ -25,20 +29,28 @@ public class ViewListServlet extends HttpServlet {
     }
 
     private void sendResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//        Set<Client> clients = clientService.getAllClient();
-//        Set<Client> sortClients = new TreeSet<>(clients);
-        Set<Address> addressSet = clientService.getAllInformation();
-        String filterParam = request.getParameter("filter");
-        List<Address> filteredList = getFilteredList(addressSet, filterParam);
-
         response.setContentType("text/html; charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
+
+        List<Address> addressList = clientService.getAllInformation();
+        String filterName = request.getParameter("filter");
+        String filterType = request.getParameter("select");
+
+
+        List<Address> filteredList = getFilteredList(addressList, filterName, filterType);
+        filteredList.sort((a, b) -> a.getClient().getClientId() - b.getClient().getClientId());
+
         PrintWriter out = response.getWriter();
         out.println("<html><body>");
-        out.println("<form action=\"ViewListServlet\" method=\"get\" align=\"center\">\n" +
-                "    <p><input type=\"text\" name=\"filter\" placeholder=\"filter\">\n" +
-                "    <input type=\"submit\" value=\"Filter\"></p>\n" +
-                "</form>");
+        out.println("<form action=\"ViewListServlet\" method=\"get\" align=\"center\">");
+        out.println("<p><input type=\"text\" name=\"filter\" placeholder=\"filter\">");
+        out.println("<select name=\"select\">\n");
+        out.println("<option value=\"\"></option>");
+        out.println("<option value=\"" + Type.TYPE1.getClientType() + "\">" + Type.TYPE1.getClientType() + "</option>");
+        out.println("<option value=\"" + Type.TYPE2.getClientType() + "\">" + Type.TYPE2.getClientType() + "</option>");
+        out.println("</select>");
+        out.println("<input type=\"submit\" value=\"Filter\"></p>");
+        out.println("</form>");
         out.println("<table align=\"center\" cellpadding=\"5\" border=\"5px double #000\" cellspacing=\"0\">");
         out.println("<tr>");
         out.println("<th>clientId</th>");
@@ -50,34 +62,45 @@ public class ViewListServlet extends HttpServlet {
         out.println("<th>model</th>");
         out.println("<th>address</th>");
         out.println("</tr>");
-//        for(Client client : sortClients) {
-            for (Address address : filteredList) {
-                out.println("<tr>");
-                out.println("<td>" + address.getClient().getClientId() + "</td>");
-                out.println("<td>" + address.getClient().getClientName() + "</td>");
-                out.println("<td>" + address.getClient().getType() + "</td>");
-                out.println("<td>" + address.getClient().getAdded() + "</td>");
-                out.println("<td>" + address.getIp() + "</td>");
-                out.println("<td>" + address.getMac() + "</td>");
-                out.println("<td>" + address.getModel() + "</td>");
-                out.println("<td>" + address.getAddress() + "</td>");
-                out.println("</tr>");
-            }
-//        }
+        for (Address address : filteredList) {
+            out.println("<tr>");
+            out.println("<td>" + address.getClient().getClientId() + "</td>");
+            out.println("<td>" + address.getClient().getClientName() + "</td>");
+            out.println("<td>" + address.getClient().getType() + "</td>");
+            out.println("<td>" + address.getClient().getAdded() + "</td>");
+            out.println("<td>" + address.getIp() + "</td>");
+            out.println("<td>" + address.getMac() + "</td>");
+            out.println("<td>" + address.getModel() + "</td>");
+            out.println("<td>" + address.getAddress() + "</td>");
+            out.println("</tr>");
+        }
         out.println("</table>");
         out.println("</body></html>");
     }
 
-    private List<Address> getFilteredList(Set<Address> addressSet, String filterParam) {
+    private List<Address> getFilteredList(List<Address> addressList, String filterName, String filterType) {
         List<Address> list = new ArrayList<>();
-        if(filterParam != null && !filterParam.isEmpty()) {
-            for (Address address : addressSet) {
-                if (address.toString().contains(filterParam)) {
+        if (filterName != null && !filterName.isEmpty()) {
+            for (Address address : addressList) {
+                if(filterType != null && !filterType.isEmpty()) {
+                    if ((address.getClient().getClientName().contains(filterName)
+                            || address.getAddress().contains(filterName))
+                            && address.getClient().getType().equals(filterType)) {
+                        list.add(address);
+                    }
+                } else if (address.getClient().getClientName().contains(filterName)
+                        || address.getAddress().contains(filterName)){
+                    list.add(address);
+                }
+            }
+        } else if (filterType != null && !filterType.isEmpty()) {
+            for (Address address : addressList) {
+                if (address.getClient().getType().equals(filterType)) {
                     list.add(address);
                 }
             }
         } else {
-            list.addAll(addressSet);
+            return addressList;
         }
         return list;
     }
